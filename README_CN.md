@@ -10,10 +10,13 @@
 
 ## 内容列表
 
-1. [类型](#type)
-2. [定义]()
-3. [对象]()
-4. [数组]()
+1. [类型](#类型)
+2. [定义](#定义)
+3. [对象](#对象)
+4. [数组](#数组)
+5. [解构](#解构)
+6. [字符串](#字符串)
+7. [函数](#函数)
 
 ## 类型
 
@@ -116,6 +119,8 @@
 	const a = 1,
 	      b = 2;
 	```
+	
+**[⬆ back to top](#内容列表)**
 	
 ## 对象
 
@@ -252,6 +257,8 @@
 	const b = {...a, c: 3};
 	```
 
+**[⬆ back to top](#内容列表)**
+
 ## 数组
 
 - 4.1 使用文字语法创建对象
@@ -370,3 +377,296 @@
 	  2,
 	];
 	```
+	
+**[⬆ back to top](#内容列表)**
+
+## 解构
+
+- 5.1 在使用多个对象属性时，使用解构。
+
+	> 修改解构定义的变量无法修改对象真实值
+	
+	```javascript
+	// bad
+	function getName(obj) {
+		const a = obj.a,
+		      b = obj.b;
+		      
+		return `${a} ${b}`;
+	}
+	
+	// good
+	function getName(obj){
+		const {a, b} = obj;
+		
+		return `${a} ${b}`;
+	}
+	
+	// best
+	function getName({a, b}) {
+		return `${a} ${b}`;
+	}
+	```
+	
+- 5.2 数组解构
+
+	```javascript
+	const arr = [1, 2, 3];
+	
+	// bad
+	const a = arr[0],
+	      b = arr[1];
+	      
+	// good
+	const [a, b] = arr;
+	```
+	
+- 5.3 对需要多个返回值时，使用对象解构而不是数组解构
+
+	> 这样可以便于以后扩容，而不至于出错，且可以指定使用哪些返回内容
+	
+	```javascript
+	// bad
+	function test(obj) {
+		return [left, right, top, bottom];
+	}
+	
+	const [left, _, top] = test(obj);
+	
+	// good
+	function test(obj) {
+		return {left, right, top, bottom};
+	}
+	
+	const {left, top} = test(obj);
+	```
+	
+**[⬆ back to top](#内容列表)**
+
+## 字符串
+
+- 6.1 使用双引号。如果没有动态内容，不使用字符串模板
+
+	```javascript
+	// bad
+	const name = 'this is name';
+	
+	const name = `this is name`;
+	
+	// good
+	const name = "this is name";
+	```
+	
+- 6.2 确保字符串在一行内完成
+
+	> 过长的字符串、换行符会造成识别异常。
+
+	```javascript
+	// bad
+	const msg = "This is a super long error that was thrown because \
+of Batman. When you stop to think about how Batman had anything to do \
+with this, you would get nowhere \
+fast.";
+
+	const msg = "This is a super long error that was thrown because " +
+	"of Batman. When you stop to think about how Batman had anything to do " +
+	"with this, you would get nowhere fast."
+	
+	// good
+	const msg = "This is a super long error that was thrown because of Batman. When you stop to think about how Batman had anything to do with this, you would get nowhere fast.";
+	```
+	
+- 6.3 有动态内容是，使用字符串模板，而不是字符串拼接
+
+	```javascript
+	const name = "test";
+	
+	// bad
+	const a = "How are you, " + name + " ?";
+	
+	const a = ["How are you,", name, "?"].join(" ");
+	
+	// good
+	const a = `How are you, ${name} ?`;
+	```
+	
+- 6.4 永远不要对字符串使用`eval()`
+
+	> 当有特殊需求且你完全确认执行效果时才能使用，且非常不建议
+	
+- 6.5 谨慎使用转义符，切只允许在双引号内使用
+
+	> 转义符因只用于字符串内的双引号转义。并会降低可读性
+	
+	```javascript
+	// bad
+	const a = `this is \"name\"`;
+	const a = "this is \'name\'";
+	
+	// good
+	const a = "this is \"name\"";
+	```
+**[⬆ back to top](#内容列表)**
+
+## 函数
+
+- 7.1 使用命名函数方式，而不是函数声明
+
+	> 函数声明，会造成函数被自动挂载于根节点中，并全局有效。
+	> 命名函数方式，可以有效的控制函数的作用范围，通过完整的函数名称进行有效的函数功能区分
+	
+	```javascript
+	// bad
+	function a() {
+	}
+	
+	// good
+	const a = function() {};
+	
+	// best
+	const a = function getKeyByObject() {};
+	```
+	
+- 7.2 将需要立即调用的函数过程内容，写在匿名函数内
+
+	> 这样可以有效的保护调用时所用到的临时变量不会污染其他作用域变量
+	
+	```javascript
+	(function(){
+		let a = 1;
+		console.log(a);
+	})()
+	```
+	
+- 7.3 永远不要在非函数块中声明函数，如`if`、`while`、`for`、`switch`，一般环境允许这么做，但会导致作用范围被限定，且会重复声明过程
+
+- 7.4 *注意*: `ECMA-262`将块定义为语句，但函数声明不是语句
+
+	```javascript
+	// bad
+	if (true) {
+	  function test() {
+	    console.log('Nope.');
+	  }
+	}
+	
+	// good
+	let test;
+	if (true) {
+	  test = () => {
+	    console.log('Yup.');
+	  };
+	}
+	```
+	
+- 7.5 永远不要将函数参数定义为`arguments`，这是默认名称，优先被系统使用
+
+	```javascript
+	// bad
+	function a(a, b, arguments){
+	}
+	
+	// good
+	function a(a, b, args){
+	}
+	```
+	
+- 7.6 尽量不要使用`arguments`内置对象，而改用操作符`...`
+
+	> `arguments`是类数组对象，不便于后续传值，且绝对不允许作为返回值输出
+	
+	```javascript
+	// bad
+	function a(){
+		const args = Array.prototype.slice.call(arguments);
+		
+		return args.join(" ");
+	}
+	
+	function b() {
+		return arguments;
+	}
+	
+	// good
+	function a(...args){
+		return args.join(" ");
+	}
+	
+	function b(...args){
+		return args;
+	}
+	```
+	
+- 7.7 使用默认参数语法，而不是修改函数参数
+
+	```javascript
+	// bad
+	function a(opts) {
+		opts = opts || {};
+	}
+	
+	function a(opts) {
+		if(opts === void 0) opts = {};
+	}
+	
+	// good
+	function a(opts= {}){}
+	```
+	
+- 7.8 避免将默认参数与动态变量进行关联
+
+	> 这会导致默认参数产生变化
+	
+	```javascript
+	let b = 1;
+	function a(v = b++){
+		console.log(v);
+	}
+	
+	a(); // 1
+	a(); // 2
+	a(); // 3
+	a(3); // 3
+	a(); // 4 
+	```
+	
+- 7.9 总是将默认参数放在最后
+
+	```javascript
+	// bad
+	function a(opts = {}, name){}
+	
+	// good
+	function a(name, opts = {}){}
+	```
+	
+- 7.10 永远不要用`new Function`方式创建函数
+
+	> 这类似于用`eval()`生成代码，会造成安全漏洞
+	
+	```javascript
+	// bad
+	let a = new Function("a","b","return a-b");
+	let a = Function("a","b","return a-b");
+	```
+	
+- 7.11 尽量使用操作符`...`，作为数组类参数的输入方式
+
+	```javascript
+	const a = [1, 2, 3];
+	// bad
+	console.log.apply(console, a); // => 1 2 3
+	
+	// good
+	console.log(...a);
+	```
+	
+	```javascript
+	// bad
+	new (Function.prototype.bind.apply(Date, [null, 2019, 1, 1]));
+	
+	// good
+	new Date(...[2019, 1, 1]);
+	```
+	
+**[⬆ back to top](#内容列表)**
