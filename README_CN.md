@@ -17,6 +17,16 @@
 5. [解构](#解构)
 6. [字符串](#字符串)
 7. [函数](#函数)
+8. [箭头函数](#箭头函数)
+9. [类](#类)
+10. [模块](#模块)
+11. [迭代器](#迭代器)
+12. [属性](#属性)
+13. [变量](#变量)
+14. [运算](#运算)
+15. [块](#块)
+16. [注释](#注释)
+17. [异步](#异步)
 
 ## 类型
 
@@ -108,16 +118,33 @@
 	console.log(b); // => 未定义，抛出异常
 	```
 	
-- 2.4 简化相同类型定义;
+- 2.4 每个变量或赋值，使用一个`const`、`let`声明，不要连写;
+
+	> 会造成多余代码，但这样更便于检查与阅读
+	> 如果变量只声明不赋值，允许连写
+
+	```javascript
+	// bad
+	const a = 1,
+	      b = 2;
+	      
+	// good
+	const a = 1;
+	const b = 2;
+	```
+	
+- 2.5 将`const`、`let`分组
 
 	```javascript
 	// bad
 	const a = 1;
-	const b = 2;
+	let b = 123;
+	const c = 2;
 	
 	// good
-	const a = 1,
-	      b = 2;
+	const a = 1;
+	const c = 2;
+	let b = 123;
 	```
 	
 **[⬆ back to top](#内容列表)**
@@ -670,3 +697,718 @@ fast.";
 	```
 	
 **[⬆ back to top](#内容列表)**
+
+## 箭头函数
+
+- 8.1 当需要使用匿名函数时，应当使用箭头函数
+
+	> 箭头函数适用于不需要重复使用的环境，这将代码更简洁
+	> 箭头函数无法使用`this`，他的作用域继承函数外层作用域
+	
+	```javascript
+	// bad
+	[1, 2, 3].map(function(x){
+		const y = x + 1;
+		return x * y;
+	});
+	
+	// good
+	[1, 2, 3].map(x => {
+		const y = x + 1;
+		return x * y;
+	});
+	```
+	
+- 8.2 如果函数主体可以用一条语句表达，那可以省略`{}`及`return`
+
+	> 当用省略`{}`时，箭头语句会以单条语句的返回值作为函数返回值
+
+	```javascript
+	// bad
+	[1, 2, 3].map(num => {
+		const next = num + 1;
+		`this is next ${next}`;
+	});
+	
+	// good
+	[1, 2, 3].map(num => `this is next ${num + 1}`);
+	
+	let out = 1;
+	function change(callback) {
+		const val = callback();
+		console.log(val === true ? 1 : 2);
+	}
+	
+	// bad
+	change(() => out = true); // => 1
+	
+	// good
+	change(() => {
+		out = true;
+	}); // => 2
+	```
+	
+- 8.3 如果当行函数主体书写时需要用到多行时，用`()`包裹
+
+	```javascript
+	const arr = {1: "1", 2:"2", 3:"3"];
+	// bad
+	[1, 2].map(x => Object.prototype.hasOwnProperty.call(
+		1,
+		2
+	));
+	
+	// good
+	[1, 2].map(x => (
+		Object.prototype.hasOwnProperty.call(
+			1,
+			2
+		)
+	));
+	```
+	
+- 8.4 如果函数参数只用到一个参数，可以省略参数的`()`
+
+	```javascript
+	// bad
+	[1, 2, 3].map((x) => x + 1);
+	
+	// good
+	[1, 2, 3].map(x => x + 1);
+	```
+	
+- 8.5 在箭头函数中，禁止使用`=>`、`=<`这样的比较语句，而因使用`>=`、`<=`，并用`()`包裹
+
+	```javascript
+	// bad
+	const getWidth = item => item.width =< 10 ? 1 : 2;
+	
+	// good
+	const getWidth = item => (item.width <= 10 ? 1 : 2);
+	
+	// good
+	const getWidth = item => {
+		const {width} = item;
+		return width <= 10 ? 1 : 2;
+	};
+	```
+	
+- 8.6 在省略`{}`且未使用`()`包裹函数主体的情况下，不允许分行书写
+
+	```javascript
+	// bad
+	a => 
+	  b;
+	  
+	a => 
+	  (b);
+	  
+	// good
+	a => b;
+	a => (b);
+	a => (
+	  b
+	);
+	```
+	
+**[⬆ back to top](#内容列表)**
+
+## 类
+
+- 9.1 总是使用`class`，避免通过`prototype`来进行类设计
+
+	> `class`语法更简洁，更容易推断
+	
+	```javascript
+	// bad
+	function test(opts = []){
+		this.list = [...opts];
+	}
+	test.prototype.pop = function(){
+		const val = this.list[0];
+		return val;
+	}
+	
+	// good
+	class test {
+		constructor(opts = []) {
+			this.list = [...opts];
+		}
+		
+		pop() {
+			const val = this.list[0];
+			return val;
+		}
+	}
+	```
+	
+- 9.2 使用`extends`进行类派生
+
+	> 派生类中，可以使用`super`获取父类对象
+	> 父类对象以本类对象为依据进行创建
+
+	```javascript
+	// good
+	class test {
+		constructor(opts = []) {
+			this.list = [...opts];
+		}
+		
+		pop() {
+			const val = this.list[0];
+			return val;
+		}
+	}
+	class test2 extends test {
+		pop() {
+			let val = super.pop();
+			return val + 1;
+		}
+	}
+	```
+	
+- 9.3 不需要明确返回的函数，应当返回`this`，以确保函数可以连写
+
+	```javascript
+	// bad
+	class test {
+		constructor(){
+			this._log = 1;
+		}
+		
+		log1(v){
+			this._log += v;
+		}
+		log2(v){
+			this._log = v;
+		}
+	}
+	
+	let a = new test();
+	a.log1(1);
+	a.log2(2);
+	
+	// good
+	class test {
+		constructor(){
+			this._log = 1;
+		}
+		
+		log1(v) {
+			this._log += v;
+			return this;
+		}
+		log2(v) {
+			this._log = v;
+			return this;
+		}
+	}
+	
+	let a = new test();
+	a.log1(1)
+	 .log2(2);
+	```
+	
+- 9.4 为了便于调试，应该对每个类重新`toString()`函数
+
+	```javascript
+	class test {
+		constructor() {
+			this._a = 1;
+			this._b = 2;
+		}
+		
+		toString() {
+			return `a: ${this._a}, b: ${this._b}`;
+		}
+	}
+	```
+	
+- 9.5 当类函数功能与父类一直时（包括构造函数），可以省略声明
+
+	```javascript
+	class a {
+		constructor() {
+			this._a = 1;
+		}
+		log(){
+			this._a++;
+			return this;
+		}
+	}
+	
+	// bad
+	class b extends a {
+		constructor(...args) {
+			super(...args);
+		}
+		log() {
+			return super.log();
+		}
+		out() {
+			this._a = 1;
+			return this;
+		}
+	}
+	
+	// good
+	class b extends a {
+		out() {
+			this._a = 1;
+			return this;
+		}
+	}
+	```
+	
+- 9.6 避免重复的对象
+
+	```javascript
+	// bad
+	class test {
+		a() { return 1; }
+		b() { return 2; }
+	}
+	```
+	
+- 9.7 类设计中，不允许使用箭头函数，并且每个函数都必须有`return`
+
+	> `class`函数的本质是`function`的简写，并需要通过`this`引用类对象内容，箭头函数无法支持`this`引用
+	
+**[⬆ back to top](#内容列表)**
+
+## 模块
+
+	> 后期补充
+	
+**[⬆ back to top](#内容列表)**
+
+## 迭代器
+
+- 11.1 不要使用迭代器，尽量使用javascript提供的函数，而不是像`for-in`、`for-of`这样的循环
+
+	```javascript
+	const arr = [1, 2, 3];
+	let sum = 0;
+	
+	// bad
+	for(let v of arr) {
+		sum += v;
+	}
+	
+	// good
+	arr.forEach(v => sum += v);
+	
+	// best
+	sum = arr.reduce(((total, v) => total + v), 0);
+	```
+
+**[⬆ back to top](#内容列表)**
+
+## 属性
+
+- 12.1 访问属性是使用`.`符号
+
+	```javascript
+	const json = {
+		a: true,
+		b: 10
+	};
+	
+	// bad
+	const a = json["a"];
+	
+	// good
+	const a = json.a;
+	```
+	
+- 12.2 使用`[]`访问带有变量的属性
+
+	```javascript
+	const json = {
+		a: true,
+		b: 10
+	};
+	
+	function getProp(name){
+		return json[name];
+	}
+	
+	console.log(getProp(“a"));
+	```
+
+**[⬆ back to top](#内容列表)**
+
+## 变量
+
+- 13.1 所有的变量都必须定义`const`、`let`
+
+	```javascript
+	// bad
+	a = 123;
+	
+	// good
+	const a = 123;
+	```
+
+- 13.2 变量声明放在代码合适的位置，如果某段代码不需要使用，应把声明置后
+
+	```javascript
+	// bad
+	function test(name){
+		const val = `${name}_123`;
+		
+		if(name) return false;
+		
+		if(val) return false;
+		
+		return val; 
+	}
+	
+	// good
+	function test(name){
+		if(name) return false;
+		
+		const val = `${name}_123`;
+		
+		if(val) return false;
+		
+		return val;
+	}
+	```
+	
+- 13.3 不要使用链接变量方式声明并赋值变量
+
+	> 链接变量赋值会隐式创建全局变量
+
+	```javascript
+	// bad
+	(function(){
+		let a = b = 1;
+	})();
+	console.log(a); // => 1
+	console.log(b); // => 变量未定义
+	
+	// good
+	(function(){
+		let a = 1;
+		let b = a;
+	})();
+	console.log(a); // => 变量未定义
+	console.log(b); // => 变量未定义
+	```
+	
+- 13.4 避免使用`++`、`--`语法
+
+	> 在特定编译环境是，一元递增或递减语句会受到异常判定，导致值不正确
+	> 一元操作符在变量之前与之后存在完全不同的结果，应避免误解
+	
+	```javascript
+	let num = 1;
+	
+	// bad
+	num++;
+	--num;
+	
+	// good
+	num += 1;
+	num -= 1;
+	```
+	
+- 13.5 不允许声明未使用的变量
+
+	```javascript
+	// bad
+	function test() {
+		let a = 123;
+		
+		return this;
+	}
+	```
+	
+**[⬆ back to top](#内容列表)**
+
+## 运算
+
+- 14.1 使用`===`、`!==`代替`==`、`!=`
+
+- 14.2 条件语句(比如`if`)，使用`ToBoolean`抽象方法强制求值是，遵循以下规则
+
+	- *Object*对象 = *true*
+	- *undefined* = *false*
+	- *null* = *false*
+	- *number*对象中 *+0*、*-0*、*NaN* = *false*，其他为*true*
+	- *string*对象中空字符串 = false
+
+- 14.3 建议使用`14.2`的规则，进行简单条件判定
+
+	> 但有部分例外如下
+
+	```javascript
+	// bad
+	if(name) {}
+	
+	if(list.length){}
+	
+	// good
+	if(name !== ""){}
+	
+	if(list.length > 0){}
+	```
+	
+- 14.4 使用`{}`来包裹，含有定义声明的`case`语句
+
+	> `switch`下的所有`case`共用一个作用域，所以相同名称会造成定义冲突
+	
+	```javascript
+	// bad
+	switch (true) {
+		case 1:
+			let x = 1;
+			break;
+		case 2:
+			let x = 2;
+			break;
+	}
+	
+	// good
+	switch (true){
+		case 1: {
+			let x = 1;
+			break;
+		}
+		case 2: {
+			let x = 2;
+			break;
+		}
+	}
+	```
+	
+- 14.5 使用三元表达式的时，确保语句写在同一行
+
+- 14.6 避免使用简单的二元表达式
+
+	```javascript
+	// bad
+	const t1 =  a ? a : b;
+	const t2 = c ? true : false;
+	const t3 = c ? false : true;
+	
+	// good
+	const t1 = a || b;
+	const t2 = !!c;
+	const t3 = !c;
+	```
+	
+- 14.7 当混合运算是，用`()`包裹单项
+
+	```javascript
+	// bad
+	const t1 = a && b < 0 || c > 0 || d + 1 === 0;
+	const t2 = a ** b - 5 % d;
+	
+	// good
+	const t1 = (a && b < 0) || (c > 0) || (d + 1 === 0);
+	const t2 = (a ** b) - (5 % d);
+	```
+	
+- 14.8 不要使用选择符来代替控制语句
+
+	```javascript
+	// bad
+	!isRunning && doThing();
+	
+	// good
+	if(!isRunning) {
+		doThing();
+	}
+	```
+
+**[⬆ back to top](#内容列表)**
+
+## 块
+
+- 15.1 优先使用单行语句，并在单行时省略块
+
+	```javascript
+	// bad
+	if (true)
+		return false;
+		
+	function test() { return false; }
+		
+	// good
+	if (true) return false;
+	
+	function test() {
+		return false;
+	}
+	```
+	
+- 15.2 如果`if`块最终会执行`return`语句，这不需要后续的else块，并在包含返回值的`if`块后面的`else if`块中的返回可以分割为多个`if`块
+
+	```javascript
+	// bad
+	function t1(){
+		if(x) {
+			return x;
+		} else {
+			return y;
+		}
+	}
+	
+	function t2(){
+		if(x) {
+			return x;
+		} else if(y) {
+			return y;
+		}
+	}
+	
+	// good
+	function t1() {
+		if(x){
+			return x;
+		}
+		
+		return y;
+	}
+	
+	function t2() {
+		if(x){
+			return x;
+		}
+		
+		if(y){
+			return y;
+		}
+	}
+	```
+
+**[⬆ back to top](#内容列表)**
+
+## 注释
+
+- 16.1 使用`/** ... */`作为多行注释
+
+	> 注释内容与`*`有一个空格间距
+
+	```javascript
+	// bad
+	// mark function is test
+	//
+	// @param {String} tag
+	// @return {Number} result
+	function make(tag) {
+	
+	  // ...
+	
+	  return result;
+	}
+	
+	// good
+	/**
+	 * mark function is test
+	 *
+	 * @param {String} tag
+	 * @return {Number} result
+	 * /
+	function make(tag) {
+	
+	  // ...
+	
+	  return result;
+	}
+	```
+	
+- 16.2 使用`//`作为单行注释
+
+- 16.3 使用保留词作为问题说明
+
+	- `// TODO: 需要去做的事情及说明`
+	- `// WARN: 需要警告的内容`
+	- `// ERROR: 错误情况说明`
+	- `// FIX: 修复状态及情况说明`
+
+**[⬆ back to top](#内容列表)**
+	
+## 异步
+
+- 17.1 不要使用Generator作为异步方案，应该使用`async`
+
+	> `generator`函数非常容易引起误解，并且在异步流程时不可控
+	
+- 17.2 如果一定要使用`generator`函数（为了做某些环境下的适配），遵循书写规则
+
+	```javascript
+	// bad
+	function * a() {}
+	
+	function*a(){}
+	
+	function *a(){}
+	
+	const a = function * () {}
+	
+	const a = function*() {}
+	
+	//good
+	function* a() {}
+	
+	const a = function* (){}
+	```
+
+- 17.3 异步操作应使用`async/await`语法，搭配`Promise`扩展对象，让代码更便于阅读
+
+	> `Promise`扩展对象，基于Promise对象，扩展了部分函数，让它更便于使用，写异步函数更贴近同步函数
+
+	```javascript
+	// bad
+	async function t1() {
+		return new Promise(function(resovle, reject){
+			// do some thing
+		});
+	}
+	
+	async function test(){
+		const a = t1();
+		
+		a
+			.then(function(result){
+				// done result do thing
+			})
+			.catch(function(err){
+				// fail result do thing
+			});
+	}
+	
+	// good
+	async function t1() {
+		const dtd = jShow.Deferred(true);
+		
+		try{
+			dtd.resolve(1);
+		}
+		catch(e){
+			dtd.reject(e);
+		}
+		
+		return dtd.promise();
+	}
+	
+	async function test() {
+		const dtd = jShow.Deferred(true);
+		
+		try{
+			let result = await t1();
+			
+			if(result !== 1) throw 0;
+			
+			dtd.resolve(result);
+		}
+		catch(e){
+			dtd.reject(e);
+		}
+		
+		return dtd.promise();
+	}
+	```
