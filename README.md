@@ -2,7 +2,7 @@
 
 *A style guide to Javascript，refer to [Airbnb](https://github.com/airbnb/javascript)*
 
-> **注意**: this guide assumes you are use [jShow](https://github.com/j-show/jShow)。
+> **Note**: this guide assumes you are use [jShow](https://github.com/j-show/jShow)。
 
 Other Style Guides
 
