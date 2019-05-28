@@ -1341,12 +1341,13 @@ fast.";
 	
 - 16.2 Use `//` for single line comments. Place single line comments on a newline above the subject of the comment. Put an empty line before the comment unless it’s on the first line of a block.
 
-- 16.3 Prefixing your comments with `FIX` or `TODO` helps other developers quickly understand if you’re pointing out a problem that needs to be revisited, or if you’re suggesting a solution to the problem that needs to be implemented. These are different than regular comments because they are actionable. The actions are `FIX: -- need to figure this out` or `TODO: -- need to implement`.
+- 16.3 Prefixing your comments with `@FIX` or `@TODO` helps other developers quickly understand if you’re pointing out a problem that needs to be revisited, or if you’re suggesting a solution to the problem that needs to be implemented. These are different than regular comments because they are actionable. The actions are `@FIX: -- need to figure this out` or `@TODO: -- need to implement`.
 
-	- `// TODO: Need to do and instructions`
-	- `// WARN: What to warn about`
-	- `// ERROR: Error information and instructions`
-	- `// FIX: Repair status and situation description`
+	- `// @EXPLAIN: This is explain`
+	- `// @TODO: Need to do and instructions`
+	- `// @WARN: What to warn about`
+	- `// @ERROR: Error information and instructions`
+	- `// @FIX: Repair status and situation description`
 
 **[⬆ back to top](#table-of-contents)**
 	
